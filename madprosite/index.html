@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="1l83v-UDb_eth7jygQ" />
+<title>GameVault — Buy & Sell Game Accounts, Items, Currency & Boosting</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{--bg:#17171a;--card:#222226;--text:#f4f4f5;--muted:#9a9aa3;--accent:#bd3193;--accent-soft:rgba(189,49,147,.16);--accent2:#0891b2;--accent2-soft:rgba(8,145,178,.16);--border:rgba(154,154,163,.16)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Archivo',sans-serif}
+.bg-page{background:radial-gradient(900px 480px at 85% -5%, rgba(189,49,147,.14), transparent 60%), radial-gradient(700px 400px at 5% 15%, rgba(8,145,178,.12), transparent 55%), var(--bg)}
+.chip{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:600;border:1px solid var(--border);color:var(--muted);background:transparent;cursor:pointer;transition:all .2s ease;white-space:nowrap;font-family:inherit}
+.chip:hover{color:var(--text);border-color:var(--muted)}
+.chip.active{background:var(--accent-soft);color:var(--text);border-color:var(--accent)}
+.game-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all .25s ease;text-align:center}
+.game-card:hover{transform:translateY(-3px);border-color:var(--accent2)}
+.game-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 8px 30px rgba(189,49,147,.2)}
+.prod-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.prod-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.buy-btn{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;transition:all .2s ease;font-family:inherit}
+.buy-btn:hover{transform:scale(1.04);box-shadow:0 4px 16px rgba(189,49,147,.4)}
+.buy-btn.added{background:var(--accent2)}
+.thumb{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:16/10;overflow:hidden}
+.thumb::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 20%, rgba(255,255,255,.15), transparent 55%)}
+.step-num{font-size:44px;font-weight:900;line-height:1;color:transparent;-webkit-text-stroke:1.5px var(--accent2);opacity:.7}
+.feat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;transition:border-color .25s ease}
+.feat-card:hover{border-color:var(--accent2)}
+input,select,textarea{outline:none;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--accent-soft)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:12px 22px;border-radius:12px;font-weight:700;font-size:14px;transition:transform .3s ease;z-index:60;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+/* Admin */
+.admin-fab{position:fixed;bottom:20px;right:20px;z-index:70;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;font-size:22px;box-shadow:0 6px 20px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:80;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;max-width:720px;width:100%;position:relative}
+.admin-table{width:100%;border-collapse:collapse;font-size:13px}
+.admin-table th{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.admin-table td{padding:8px 10px;border-bottom:1px solid var(--border)}
+.adm-btn{padding:7px 14px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+.adm-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.adm-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.adm-danger{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.4)}
+.adm-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px}
+.adm-tab{padding:8px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:transparent;font-family:inherit}
+.adm-tab.active{background:var(--accent-soft);color:var(--text);border-color:var(--accent)}
+.close-x{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+</style>
+</head>
+<body>
+<div class="bg-page">
+
+  <!-- NAVBAR -->
+  <nav class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-2.5">
+      <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <span style="font-weight:900;font-size:22px;letter-spacing:-.02em;">Game<span style="color:var(--accent);">Vault</span></span>
+    </div>
+    <div class="hidden md:flex items-center gap-7" style="font-size:14px;color:var(--muted);font-weight:500;">
+      <a href="#games" style="color:var(--text);">Games</a><a href="#market">Accounts</a><a href="#market">Items</a><a href="#market">Currency</a><a href="#market">Boosting</a><a href="#sell">Sell</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="relative flex items-center" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:7px 12px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span id="cartCount" style="margin-left:6px;font-size:13px;font-weight:700;min-width:16px;text-align:center;">0</span>
+      </div>
+      <button class="adm-btn adm-primary" style="padding:9px 18px;font-size:14px;" onclick="document.getElementById('sell').scrollIntoView({behavior:'smooth'})">Start selling</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="max-w-6xl mx-auto px-6 pt-12 pb-14 text-center">
+    <span style="display:inline-block;padding:6px 14px;border-radius:999px;background:var(--accent2-soft);border:1px solid var(--accent2);font-size:12px;font-weight:700;color:var(--text);letter-spacing:.06em;">300+ GAMES · 1.2M+ PLAYERS · SECURE ESCROW</span>
+    <h1 style="font-size:clamp(34px,6vw,60px);font-weight:900;line-height:1.05;letter-spacing:-.03em;margin-top:24px;">Buy &amp; sell <span style="background:linear-gradient(100deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;">game accounts, items &amp; services</span></h1>
+    <p style="color:var(--muted);font-size:17px;max-width:580px;line-height:1.6;margin:20px auto 0;">Accounts, rare items, in-game gold, rank boosting and top-ups — all in one player-to-player marketplace. Every trade protected by PlayerGuardian escrow.</p>
+    <div class="mx-auto flex items-center gap-2 flex-wrap justify-center" style="max-width:600px;margin-top:32px;">
+      <div class="flex items-center gap-2 flex-1" style="min-width:240px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="searchInput" type="text" placeholder="Search game, item, account or service..." style="background:transparent;border:none;color:var(--text);font-size:14px;width:100%;"/>
+      </div>
+      <button class="adm-btn adm-primary" style="padding:12px 26px;font-size:14px;" onclick="document.getElementById('market').scrollIntoView({behavior:'smooth'})">Search</button>
+    </div>
+    <div class="flex flex-wrap justify-center gap-8" style="margin-top:40px;">
+      <div><div style="font-size:28px;font-weight:900;">300+</div><div style="font-size:12px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.08em;">Games supported</div></div>
+      <div><div style="font-size:28px;font-weight:900;">1.2M+</div><div style="font-size:12px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.08em;">Active traders</div></div>
+      <div><div style="font-size:28px;font-weight:900;">25M+</div><div style="font-size:12px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.08em;">Trades completed</div></div>
+      <div><div style="font-size:28px;font-weight:900;">99.9%</div><div style="font-size:12px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.08em;">Delivery success</div></div>
+    </div>
+  </section>
+
+  <!-- SERVICE CATEGORIES -->
+  <section class="max-w-6xl mx-auto px-6 pb-10">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div class="feat-card text-center" style="padding:18px 12px;"><div style="color:var(--accent);margin-bottom:6px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto;"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><div style="font-weight:700;font-size:14px;">Accounts</div><div style="font-size:11px;color:var(--muted);margin-top:3px;">Leveled &amp; rare accounts</div></div>
+      <div class="feat-card text-center" style="padding:18px 12px;"><div style="color:var(--accent2);margin-bottom:6px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><div style="font-weight:700;font-size:14px;">Items &amp; Gear</div><div style="font-size:11px;color:var(--muted);margin-top:3px;">Rare skins &amp; equipment</div></div>
+      <div class="feat-card text-center" style="padding:18px 12px;"><div style="color:var(--accent);margin-bottom:6px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto;"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M15 9.5a2.5 2.5 0 0 0-2.5-2.5h-1A2.5 2.5 0 0 0 9 9.5c0 1.4 1.1 2 2.5 2.5s2.5 1.1 2.5 2.5a2.5 2.5 0 0 1-2.5 2.5h-1A2.5 2.5 0 0 1 8 14.5"/></svg></div><div style="font-weight:700;font-size:14px;">Currency</div><div style="font-size:11px;color:var(--muted);margin-top:3px;">Gold, gems, coins, ISK</div></div>
+      <div class="feat-card text-center" style="padding:18px 12px;"><div style="color:var(--accent2);margin-bottom:6px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto;"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><div style="font-weight:700;font-size:14px;">Boosting</div><div style="font-size:11px;color:var(--muted);margin-top:3px;">Rank &amp; powerleveling</div></div>
+      <div class="feat-card text-center" style="padding:18px 12px;"><div style="color:var(--accent);margin-bottom:6px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto;"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg></div><div style="font-weight:700;font-size:14px;">Top-up</div><div style="font-size:11px;color:var(--muted);margin-top:3px;">Credits &amp; premium currency</div></div>
+    </div>
+  </section>
+
+  <!-- FEATURED GAMES -->
+  <section id="games" class="max-w-6xl mx-auto px-6 pb-10">
+    <p style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:6px;">Browse by game</p>
+    <h2 style="font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:16px;">Popular marketplaces</h2>
+    <div id="gameGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-3"></div>
+  </section>
+
+  <!-- MARKETPLACE -->
+  <section id="market" class="max-w-6xl mx-auto px-6 pb-20">
+    <div class="flex items-end justify-between flex-wrap gap-4 mb-6">
+      <div>
+        <p style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px;">Hot listings</p>
+        <h2 style="font-size:26px;font-weight:800;letter-spacing:-.02em;">Trending offers <span id="gameFilterLabel" style="color:var(--muted);font-size:16px;font-weight:500;"></span></h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <span style="font-size:13px;color:var(--muted);">Sort by</span>
+        <select id="sortSelect" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer;">
+          <option value="popular">Most popular</option>
+          <option value="price-asc">Price: low to high</option>
+          <option value="price-desc">Price: high to low</option>
+          <option value="rating">Top rated</option>
+        </select>
+      </div>
+    </div>
+    <div id="chips" class="flex gap-2 overflow-x-auto pb-2 mb-6" style="scrollbar-width:none;"></div>
+    <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+    <p id="emptyState" class="text-center py-12" style="color:var(--muted);display:none;">No listings match your filters. Try another game, category or keyword.</p>
+  </section>
+
+  <!-- TRUST -->
+  <section class="max-w-6xl mx-auto px-6 pb-20">
+    <div style="background:linear-gradient(135deg, rgba(8,145,178,.12), rgba(189,49,147,.08));border:1px solid var(--accent2);border-radius:20px;padding:36px;" class="flex flex-wrap items-center gap-10">
+      <div style="flex:1 1 300px;min-width:280px;">
+        <div style="width:52px;height:52px;border-radius:14px;background:var(--accent2-soft);display:flex;align-items:center;justify-content:center;color:var(--accent2);margin-bottom:16px;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <h2 style="font-size:28px;font-weight:900;letter-spacing:-.02em;line-height:1.15;">Every trade protected by <span style="color:var(--accent2);">PlayerGuardian</span> escrow</h2>
+        <p style="color:var(--muted);margin-top:10px;font-size:15px;line-height:1.6;">Payment is held securely and only released to the seller after you confirm delivery. Disputes resolved by our 24/7 support team.</p>
+      </div>
+      <div style="flex:1 1 280px;min-width:260px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;"><div style="font-size:22px;font-weight:900;color:var(--accent2);">24/7</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Live support</div></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;"><div style="font-size:22px;font-weight:900;color:var(--accent2);">5 min</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Avg. delivery</div></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;"><div style="font-size:22px;font-weight:900;color:var(--accent2);">100%</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Money-back guarantee</div></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;"><div style="font-size:22px;font-weight:900;color:var(--accent2);">4.9★</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Trustpilot rating</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="max-w-6xl mx-auto px-6 pb-20">
+    <p style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px;text-align:center;">Start in minutes</p>
+    <h2 style="font-size:28px;font-weight:800;letter-spacing:-.02em;text-align:center;margin-bottom:12px;">How selling works</h2>
+    <p style="color:var(--muted);text-align:center;max-width:480px;margin:0 auto 40px;font-size:15px;line-height:1.6;">List once, sell forever. We handle delivery, escrow and support — you keep 97% of every sale.</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="feat-card"><div class="step-num">01</div><h3 style="font-size:18px;font-weight:800;margin:14px 0 8px;">Create your listing</h3><p style="color:var(--muted);font-size:14px;line-height:1.6;">Set your price, describe the account or service, upload screenshots. Approval in under 2 hours.</p></div>
+      <div class="feat-card"><div class="step-num">02</div><h3 style="font-size:18px;font-weight:800;margin:14px 0 8px;">Deliver &amp; get verified</h3><p style="color:var(--muted);font-size:14px;line-height:1.6;">Buyer pays into escrow. You deliver via our secure system. Buyer confirms receipt.</p></div>
+      <div class="feat-card"><div class="step-num">03</div><h3 style="font-size:18px;font-weight:800;margin:14px 0 8px;">Withdraw anytime</h3><p style="color:var(--muted);font-size:14px;line-height:1.6;">Funds released instantly. Withdraw via bank, PayPal, crypto or in-game wallet. No minimums.</p></div>
+    </div>
+  </section>
+
+  <!-- SELL CTA -->
+  <section id="sell" class="max-w-6xl mx-auto px-6 pb-20">
+    <div style="background:linear-gradient(135deg, rgba(189,49,147,.14), rgba(8,145,178,.10));border:1px solid var(--accent);border-radius:20px;padding:40px;" class="flex flex-wrap items-center gap-10">
+      <div style="flex:1 1 300px;min-width:280px;">
+        <h2 style="font-size:30px;font-weight:900;letter-spacing:-.02em;line-height:1.15;">Got a spare account, rare item or skills? <span style="background:linear-gradient(100deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;">Turn it into cash.</span></h2>
+        <p style="color:var(--muted);margin-top:10px;font-size:15px;line-height:1.6;">Join 1.2M+ sellers. Zero listing fees, no monthly cost — we only earn when you do. 300+ games supported.</p>
+      </div>
+      <form id="sellForm" style="flex:1 1 320px;min-width:280px;display:flex;flex-direction:column;gap:10px;" onsubmit="return false;">
+        <input id="sellName" type="text" placeholder="Your name" class="adm-input"/>
+        <input id="sellEmail" type="email" placeholder="Email address" class="adm-input"/>
+        <select id="sellType" class="adm-input">
+          <option value="">What do you want to sell?</option>
+          <option>Game account</option><option>Items / skins / gear</option><option>In-game currency / gold</option><option>Boosting / powerleveling service</option><option>Top-up / credits service</option>
+        </select>
+        <button type="submit" class="adm-btn adm-primary" style="padding:13px;font-size:15px;">Become a seller</button>
+        <p id="sellMsg" style="font-size:13px;color:var(--accent2);min-height:18px;font-weight:700;"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="border-top:1px solid var(--border);" class="max-w-6xl mx-auto px-6 py-10">
+    <div class="flex flex-wrap justify-between gap-8">
+      <div style="max-width:260px;">
+        <div class="flex items-center gap-2.5 mb-3">
+          <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <span style="font-weight:900;font-size:18px;">Game<span style="color:var(--accent);">Vault</span></span>
+        </div>
+        <p style="color:var(--muted);font-size:13px;line-height:1.6;">The player-to-player marketplace for game accounts, items, currency and boosting services across 300+ titles.</p>
+      </div>
+      <div class="flex gap-12 flex-wrap">
+        <div><p style="font-weight:700;font-size:13px;margin-bottom:10px;">Marketplace</p><ul style="color:var(--muted);font-size:13px;line-height:2;list-style:none;padding:0;"><li>Accounts</li><li>Items &amp; Gear</li><li>Currency &amp; Gold</li><li>Boosting</li><li>Top-up</li></ul></div>
+        <div><p style="font-weight:700;font-size:13px;margin-bottom:10px;">Top games</p><ul style="color:var(--muted);font-size:13px;line-height:2;list-style:none;padding:0;"><li>Diablo IV</li><li>OSRS / RuneScape</li><li>Valorant</li><li>League of Legends</li><li>WoW</li><li>Fortnite</li><li>+300 more</li></ul></div>
+        <div><p style="font-weight:700;font-size:13px;margin-bottom:10px;">Company</p><ul style="color:var(--muted);font-size:13px;line-height:2;list-style:none;padding:0;"><li>PlayerGuardian</li><li>Sell with us</li><li>Help center</li><li>Blog &amp; guides</li><li>Contact</li></ul></div>
+      </div>
+    </div>
+    <div class="mt-10 pt-6 flex flex-wrap justify-between gap-3" style="border-top:1px solid var(--border);font-size:12px;color:var(--muted);">
+      <span>Demo concept — listings are sample data. Always use escrow-protected trades.</span>
+      <span>© 2026 GameVault. All rights reserved.</span>
+    </div>
+  </footer>
+</div>
+
+<!-- Admin floating button -->
+<button class="admin-fab" id="adminFab" title="Admin panel">&#9881;</button>
+
+<!-- Admin modal -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-box">
+    <button class="close-x" onclick="closeAdmin()">&times;</button>
+    <div id="adminLoginView">
+      <h3 style="font-size:20px;font-weight:800;margin-bottom:6px;">Admin login</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Enter your admin password to manage the marketplace.</p>
+      <input type="password" id="adminPass" class="adm-input" placeholder="Admin password" style="margin-bottom:10px;"/>
+      <p id="loginErr" style="color:#f87171;font-size:12px;min-height:16px;margin-bottom:10px;"></p>
+      <button class="adm-btn adm-primary" onclick="doLogin()">Log in</button>
+    </div>
+    <div id="adminPanelView" style="display:none;">
+      <div class="flex items-center justify-between flex-wrap gap-3" style="margin-bottom:16px;">
+        <h3 style="font-size:20px;font-weight:800;">Admin dashboard</h3>
+        <button class="adm-btn adm-ghost" onclick="doLogout()">Log out</button>
+      </div>
+      <div class="flex gap-2 flex-wrap" style="margin-bottom:18px;">
+        <button class="adm-tab active" data-tab="listings" onclick="switchTab('listings')">Listings</button>
+        <button class="adm-tab" data-tab="games" onclick="switchTab('games')">Games</button>
+        <button class="adm-tab" data-tab="orders" onclick="switchTab('orders')">Orders</button>
+        <button class="adm-tab" data-tab="settings" onclick="switchTab('settings')">Settings</button>
+      </div>
+
+      <div id="tab-listings">
+        <h4 style="font-size:14px;font-weight:700;margin-bottom:10px;" id="listingFormTitle">Add new listing</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" style="margin-bottom:10px;">
+          <input id="f_title" class="adm-input" placeholder="Title (e.g. OSRS 500M GP)"/>
+          <select id="f_game" class="adm-input"></select>
+          <select id="f_cat" class="adm-input"><option>Accounts</option><option>Currency</option><option>Items &amp; Gear</option><option>Boosting</option><option>Top-up</option></select>
+          <input id="f_price" type="number" class="adm-input" placeholder="Price (USD)"/>
+          <input id="f_seller" class="adm-input" placeholder="Seller name"/>
+          <input id="f_delivery" class="adm-input" placeholder="Delivery time (e.g. 5 min)"/>
+        </div>
+        <div class="flex gap-2" style="margin-bottom:18px;">
+          <button class="adm-btn adm-primary" onclick="saveListing()" id="saveListingBtn">Add listing</button>
+          <button class="adm-btn adm-ghost" onclick="resetListingForm()">Clear</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead><tr><th>Title</th><th>Game</th><th>Category</th><th>Price</th><th></th></tr></thead>
+            <tbody id="listingsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-games" style="display:none;">
+        <h4 style="font-size:14px;font-weight:700;margin-bottom:10px;">Manage games</h4>
+        <div class="flex gap-2" style="margin-bottom:14px;">
+          <input id="newGame" class="adm-input" placeholder="Game name (e.g. Elden Ring)" style="flex:1;"/>
+          <button class="adm-btn adm-primary" onclick="addGame()">Add game</button>
+        </div>
+        <div id="gamesList" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <div id="tab-orders" style="display:none;">
+        <h4 style="font-size:14px;font-weight:700;margin-bottom:10px;">Recent orders (from Buy clicks)</h4>
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead><tr><th>Time</th><th>Listing</th><th>Price</th></tr></thead>
+            <tbody id="ordersTbody"></tbody>
+          </table>
+        </div>
+        <p id="ordersEmpty" style="color:var(--muted);font-size:13px;padding:12px 0;">No orders yet.</p>
+      </div>
+
+      <div id="tab-settings" style="display:none;">
+        <h4 style="font-size:14px;font-weight:700;margin-bottom:10px;">Change admin password</h4>
+        <div class="flex gap-2 flex-wrap" style="margin-bottom:18px;">
+          <input id="newPass" type="password" class="adm-input" placeholder="New password" style="flex:1;min-width:180px;"/>
+          <button class="adm-btn adm-primary" onclick="changePass()">Update password</button>
+        </div>
+        <p id="setMsg" style="font-size:12px;color:var(--accent2);min-height:16px;margin-bottom:14px;"></p>
+        <h4 style="font-size:14px;font-weight:700;margin-bottom:10px;">Danger zone</h4>
+        <button class="adm-btn adm-danger" onclick="resetAll()">Reset everything to sample data</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast">Added to cart — escrow protected</div>
+
+<script>
+(function(){
+  var DEFAULT_PASS = "admin123";
+  var gameColors = {"Diablo IV":["#7c3aed","#3b0764"],"OSRS":["#f59e0b","#78350f"],"Valorant":["#ef4444","#7f1d1d"],"WoW":["#eab308","#713f12"],"Fortnite":["#06b6d4","#164e63"],"LoL":["#0ea5e9","#0c4a6e"],"PoE 2":["#a16207","#422006"],"GTA V":["#22c55e","#14532d"],"Minecraft":["#84cc16","#365314"],"Pokemon GO":["#f43f5e","#881337"],"Elden Ring":["#d4a017","#422006"],"Apex Legends":["#f97316","#7c2d12"],"All Games":["#bd3193","#0891b2"]};
+  var palette = [["#7c3aed","#3b0764"],["#f59e0b","#78350f"],["#ef4444","#7f1d1d"],["#06b6d4","#164e63"],["#22c55e","#14532d"],["#f43f5e","#881337"],["#a855f7","#4c1d95"],["#0ea5e9","#0c4a6e"]];
+
+  var SEED = {
+    games: ["All Games","Diablo IV","OSRS","Valorant","WoW","Fortnite","LoL","PoE 2","GTA V","Minecraft","Pokemon GO","Elden Ring","Apex Legends"],
+    products: [
+      {id:1,title:"Diablo IV — Lvl 100 Barbarian, BiS Gear",game:"Diablo IV",cat:"Accounts",price:249,seller:"SanctuaryTrader",sales:1240,rating:4.9,delivery:"1 hour"},
+      {id:2,title:"OSRS — 500M GP · Instant Delivery",game:"OSRS",cat:"Currency",price:189,seller:"GPFactory",sales:18200,rating:5.0,delivery:"5 min"},
+      {id:3,title:"Valorant — Bronze → Immortal Rank Boost",game:"Valorant",cat:"Boosting",price:159,seller:"RadiantBoost",sales:3400,rating:4.8,delivery:"24-48h"},
+      {id:4,title:"WoW Retail — 1,000,000 Gold",game:"WoW",cat:"Currency",price:45,seller:"AzerothGold",sales:22100,rating:4.9,delivery:"10 min"},
+      {id:5,title:"Fortnite — Black Knight + 82 Skins Account",game:"Fortnite",cat:"Accounts",price:599,seller:"LockerDeals",sales:890,rating:4.9,delivery:"30 min"},
+      {id:6,title:"LoL — All Champions, 200+ Skins, Diamond",game:"LoL",cat:"Accounts",price:349,seller:"RiftAccounts",sales:2100,rating:4.7,delivery:"1 hour"},
+      {id:7,title:"Path of Exile 2 — Divine Orb ×50",game:"PoE 2",cat:"Currency",price:120,seller:"ExileMerch",sales:760,rating:4.8,delivery:"15 min"},
+      {id:8,title:"GTA V — Modded Account, $500M Cash + RP",game:"GTA V",cat:"Accounts",price:89,seller:"LosSantosDeals",sales:5600,rating:4.8,delivery:"2 hours"},
+      {id:9,title:"Minecraft — Hypixel Skyblock 100M Coins",game:"Minecraft",cat:"Currency",price:32,seller:"BlockBank",sales:9800,rating:4.9,delivery:"5 min"},
+      {id:10,title:"Pokemon GO — Lvl 40, 5 Shiny Legendaries",game:"Pokemon GO",cat:"Accounts",price:149,seller:"PokeVault",sales:1700,rating:4.7,delivery:"1 hour"},
+      {id:11,title:"Elden Ring — Runes ×50M (Max Level Ready)",game:"Elden Ring",cat:"Currency",price:25,seller:"RoundtableHold",sales:4200,rating:4.9,delivery:"10 min"},
+      {id:12,title:"Apex Legends — Predator Badge + Rank Boost",game:"Apex Legends",cat:"Boosting",price:210,seller:"PredSquad",sales:640,rating:4.8,delivery:"3-5 days"}
+    ],
+    orders: [],
+    password: DEFAULT_PASS
+  };
+
+  function load(){
+    try{
+      var raw = localStorage.getItem("gamevault_data");
+      if(raw){ return JSON.parse(raw); }
+    }catch(e){}
+    return JSON.parse(JSON.stringify(SEED));
+  }
+  var DB = load();
+  function save(){ try{ localStorage.setItem("gamevault_data", JSON.stringify(DB)); }catch(e){} }
+
+  var games = DB.games, products = DB.products;
+  var cats = ["All","Accounts","Currency","Items & Gear","Boosting","Top-up"];
+  var activeCat = "All", activeGame = "All Games", cart = 0, editingId = null;
+
+  var icons = {
+    Accounts:'<rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>',
+    Currency:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10M14.5 9.5a2.5 2.5 0 0 0-2.5-1.5h-1A2.5 2.5 0 0 0 8.5 10.5c0 1.4 1.1 2 2.5 2.5s2.5 1.1 2.5 2.5a2.5 2.5 0 0 1-2.5 2.5h-1A2.5 2.5 0 0 1 8.5 13.5"/>',
+    "Items & Gear":'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+    Boosting:'<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+    "Top-up":'<rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/>'
+  };
+
+  var gameGridEl=document.getElementById('gameGrid'), chipsEl=document.getElementById('chips'), gridEl=document.getElementById('grid'), emptyEl=document.getElementById('emptyState'), searchEl=document.getElementById('searchInput'), sortEl=document.getElementById('sortSelect'), cartEl=document.getElementById('cartCount'), toastEl=document.getElementById('toast'), labelEl=document.getElementById('gameFilterLabel');
+
+  function gameColor(g){ return gameColors[g] || palette[Math.abs(g.split("").reduce(function(a,c){return a+c.charCodeAt(0);},0)) % palette.length]; }
+  function initials(g){ if(g==="All Games") return "ALL"; return g.split(" ").map(function(w){return w[0];}).join("").slice(0,3).toUpperCase(); }
+
+  function renderGames(){
+    gameGridEl.innerHTML = games.map(function(g){
+      var c = gameColor(g);
+      return '<div class="game-card'+(g===activeGame?' active':'')+'" data-game="'+g+'"><div style="width:44px;height:44px;border-radius:12px;margin:0 auto 8px;background:linear-gradient(135deg,'+c[0]+','+c[1]+');display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff;">'+initials(g)+'</div><div style="font-size:12px;font-weight:700;line-height:1.3;">'+g+'</div></div>';
+    }).join('');
+    Array.prototype.forEach.call(gameGridEl.querySelectorAll('.game-card'), function(el){
+      el.addEventListener('click', function(){
+        activeGame = el.getAttribute('data-game');
+        labelEl.textContent = activeGame==="All Games" ? "" : "· "+activeGame;
+        renderGames(); renderGrid();
+        document.getElementById('market').scrollIntoView({behavior:'smooth',block:'start'});
+      });
+    });
+  }
+
+  function renderChips(){
+    chipsEl.innerHTML = cats.map(function(c){ return '<button class="chip'+(c===activeCat?' active':'')+'" data-cat="'+c+'">'+c+'</button>'; }).join('');
+    Array.prototype.forEach.call(chipsEl.querySelectorAll('.chip'), function(b){
+      b.addEventListener('click', function(){ activeCat = b.getAttribute('data-cat'); renderChips(); renderGrid(); });
+    });
+  }
+
+  function getFiltered(){
+    var q = (searchEl.value||'').toLowerCase().trim();
+    var list = products.filter(function(p){
+      var catOk = activeCat==="All" || p.cat===activeCat;
+      var gameOk = activeGame==="All Games" || p.game===activeGame;
+      var qOk = !q || (p.title+' '+p.seller+' '+p.game+' '+p.cat).toLowerCase().indexOf(q)>-1;
+      return catOk && gameOk && qOk;
+    });
+    var s = sortEl.value;
+    if(s==='price-asc') list.sort(function(a,b){return a.price-b.price;});
+    else if(s==='price-desc') list.sort(function(a,b){return b.price-a.price;});
+    else if(s==='rating') list.sort(function(a,b){return b.rating-a.rating;});
+    else list.sort(function(a,b){return b.sales-a.sales;});
+    return list;
+  }
+
+  function stars(r){ var full=Math.round(r),out=''; for(var i=0;i<5;i++){ out+='<span style="color:'+(i<full?'#f59e0b':'rgba(154,154,163,.3)')+';font-size:11px;">★</span>'; } return out; }
+  function catTagColor(c){
+    if(c==="Accounts") return "background:var(--accent-soft);color:var(--text);border:1px solid var(--accent);";
+    if(c==="Currency") return "background:var(--accent2-soft);color:var(--text);border:1px solid var(--accent2);";
+    if(c==="Boosting") return "background:rgba(245,158,11,.14);color:var(--text);border:1px solid #f59e0b;";
+    return "background:rgba(154,154,163,.12);color:var(--text);border:1px solid var(--border);";
+  }
+
+  function renderGrid(){
+    var list = getFiltered();
+    emptyEl.style.display = list.length ? 'none' : 'block';
+    gridEl.innerHTML = list.map(function(p){
+      var ic = icons[p.cat] || icons.Accounts;
+      var gc = gameColor(p.game);
+      return '<div class="prod-card" data-id="'+p.id+'">'
+        +'<div class="thumb" style="background:linear-gradient(135deg,'+gc[0]+','+gc[1]+');">'
+        +'<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.92)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="position:relative;z-index:1;">'+ic+'</svg>'
+        +'<span class="tag" style="position:absolute;top:10px;left:10px;z-index:2;'+catTagColor(p.cat)+'">'+p.cat+'</span>'
+        +'<span style="position:absolute;top:10px;right:10px;z-index:2;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;color:#fff;">'+p.game+'</span>'
+        +'</div><div style="padding:16px;">'
+        +'<h3 style="font-weight:700;font-size:14px;line-height:1.35;margin-bottom:5px;min-height:38px;">'+p.title+'</h3>'
+        +'<p style="font-size:12px;color:var(--muted);margin-bottom:8px;">by '+p.seller+'</p>'
+        +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">'+stars(p.rating||4.8)+'<span style="font-size:11px;color:var(--muted);">'+(p.rating||4.8)+' · '+(p.sales||0).toLocaleString()+' sales</span></div>'
+        +'<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Delivery in ~'+(p.delivery||'1 hour')+'</div>'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:20px;font-weight:900;">$'+p.price+'</span>'
+        +'<button class="buy-btn" data-buy="'+p.id+'">Buy now</button></div></div></div>';
+    }).join('');
+    Array.prototype.forEach.call(gridEl.querySelectorAll('[data-buy]'), function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var id = parseInt(btn.getAttribute('data-buy'),10);
+        var item = products.find(function(p){return p.id===id;});
+        cart++; cartEl.textContent = cart;
+        if(item){ DB.orders.unshift({time:new Date().toLocaleString(), title:item.title, price:item.price}); save(); }
+        btn.textContent = 'Added ✓'; btn.classList.add('added'); toastEl.classList.add('show');
+        setTimeout(function(){ btn.textContent='Buy now'; btn.classList.remove('added'); toastEl.classList.remove('show'); }, 1400);
+      });
+    });
+  }
+
+  searchEl.addEventListener('input', renderGrid);
+  sortEl.addEventListener('change', renderGrid);
+
+  var form = document.getElementById('sellForm'), msg = document.getElementById('sellMsg');
+  form.addEventListener('submit', function(){
+    var name=document.getElementById('sellName').value.trim(), email=document.getElementById('sellEmail').value.trim(), type=document.getElementById('sellType').value;
+    if(!name||!email||!type){ msg.style.color='#f87171'; msg.textContent='Please fill in all fields to continue.'; return; }
+    msg.style.color='var(--accent2)'; msg.textContent='Welcome aboard, '+name+'! Check '+email+' for your seller onboarding link.';
+    form.reset();
+  });
+
+  /* ============ ADMIN ============ */
+  var loggedIn = false;
+  document.getElementById('adminFab').addEventListener('click', function(){
+    document.getElementById('adminModal').classList.add('open');
+    if(!loggedIn){ document.getElementById('adminLoginView').style.display='block'; document.getElementById('adminPanelView').style.display='none'; }
+  });
+  window.closeAdmin = function(){ document.getElementById('adminModal').classList.remove('open'); };
+  window.doLogin = function(){
+    var p = document.getElementById('adminPass').value;
+    if(p === DB.password){
+      loggedIn = true;
+      document.getElementById('adminLoginView').style.display='none';
+      document.getElementById('adminPanelView').style.display='block';
+      document.getElementById('loginErr').textContent='';
+      document.getElementById('adminPass').value='';
+      switchTab('listings');
+    } else {
+      document.getElementById('loginErr').textContent = 'Wrong password. Default is admin123 (change it in Settings).';
+    }
+  };
+  window.doLogout = function(){ loggedIn=false; closeAdmin(); };
+  window.switchTab = function(t){
+    Array.prototype.forEach.call(document.querySelectorAll('.adm-tab'), function(b){ b.classList.toggle('active', b.getAttribute('data-tab')===t); });
+    ['listings','games','orders','settings'].forEach(function(x){ document.getElementById('tab-'+x).style.display = x===t?'block':'none'; });
+    if(t==='listings') renderAdminListings();
+    if(t==='games') renderAdminGames();
+    if(t==='orders') renderOrders();
+  };
+
+  function fillGameSelect(){
+    var sel = document.getElementById('f_game');
+    sel.innerHTML = games.filter(function(g){return g!=="All Games";}).map(function(g){return '<option>'+g+'</option>';}).join('');
+  }
+  window.resetListingForm = function(){
+    editingId=null;
+    document.getElementById('listingFormTitle').textContent='Add new listing';
+    document.getElementById('saveListingBtn').textContent='Add listing';
+    ['f_title','f_price','f_seller','f_delivery'].forEach(function(id){document.getElementById(id).value='';});
+  };
+  window.saveListing = function(){
+    var title=document.getElementById('f_title').value.trim(), game=document.getElementById('f_game').value, cat=document.getElementById('f_cat').value, price=parseFloat(document.getElementById('f_price').value), seller=document.getElementById('f_seller').value.trim()||"You", delivery=document.getElementById('f_delivery').value.trim()||"1 hour";
+    if(!title || isNaN(price)){ alert('Please fill in at least a title and a valid price.'); return; }
+    if(editingId){
+      var p = products.find(function(x){return x.id===editingId;});
+      if(p){ p.title=title;p.game=game;p.cat=cat;p.price=price;p.seller=seller;p.delivery=delivery; }
+    } else {
+      var nid = products.length ? Math.max.apply(null, products.map(function(p){return p.id;}))+1 : 1;
+      products.push({id:nid,title:title,game:game,cat:cat,price:price,seller:seller,sales:0,rating:4.8,delivery:delivery});
+    }
+    save(); resetListingForm(); renderAdminListings(); renderGames(); renderGrid();
+  };
+  function renderAdminListings(){
+    fillGameSelect();
+    document.getElementById('listingsTbody').innerHTML = products.map(function(p){
+      return '<tr><td>'+p.title+'</td><td>'+p.game+'</td><td>'+p.cat+'</td><td>$'+p.price+'</td><td style="white-space:nowrap;"><button class="adm-btn adm-ghost" style="padding:4px 10px;font-size:12px;margin-right:6px;" onclick="editListing('+p.id+')">Edit</button><button class="adm-btn adm-danger" style="padding:4px 10px;font-size:12px;" onclick="delListing('+p.id+')">Delete</button></td></tr>';
+    }).join('');
+  }
+  window.editListing = function(id){
+    var p = products.find(function(x){return x.id===id;}); if(!p) return;
+    editingId = id;
+    document.getElementById('listingFormTitle').textContent = 'Edit listing #'+id;
+    document.getElementById('saveListingBtn').textContent = 'Save changes';
+    document.getElementById('f_title').value=p.title;
+    document.getElementById('f_game').value=p.game;
+    document.getElementById('f_cat').value=p.cat;
+    document.getElementById('f_price').value=p.price;
+    document.getElementById('f_seller').value=p.seller;
+    document.getElementById('f_delivery').value=p.delivery;
+    document.getElementById('tab-listings').scrollIntoView({behavior:'smooth',block:'nearest'});
+  };
+  window.delListing = function(id){
+    if(!confirm('Delete this listing?')) return;
+    products = products.filter(function(p){return p.id!==id;});
+    DB.products = products; save(); renderAdminListings(); renderGrid();
+  };
+  function renderAdminGames(){
+    document.getElementById('gamesList').innerHTML = games.filter(function(g){return g!=="All Games";}).map(function(g){
+      var c = gameColor(g);
+      return '<div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:6px 10px 6px 6px;"><span style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,'+c[0]+','+c[1]+');display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;">'+initials(g)+'</span><span style="font-size:13px;font-weight:600;">'+g+'</span><button class="adm-btn adm-danger" style="padding:2px 8px;font-size:11px;margin-left:6px;" onclick="delGame(\''+g.replace(/'/g,"\\'")+'\')">&times;</button></div>';
+    }).join('');
+  }
+  window.addGame = function(){
+    var g = document.getElementById('newGame').value.trim();
+    if(!g) return;
+    if(games.indexOf(g)===-1){ games.push(g); DB.games=games; save(); }
+    document.getElementById('newGame').value='';
+    renderAdminGames(); renderGames(); fillGameSelect();
+  };
+  window.delGame = function(g){
+    if(!confirm('Remove "'+g+'" from the games list? (Listings for it remain.)')) return;
+    games = games.filter(function(x){return x!==g;}); DB.games=games; save();
+    renderAdminGames(); renderGames(); fillGameSelect();
+  };
+  function renderOrders(){
+    var tb = document.getElementById('ordersTbody');
+    document.getElementById('ordersEmpty').style.display = DB.orders.length ? 'none' : 'block';
+    tb.innerHTML = DB.orders.slice(0,50).map(function(o){ return '<tr><td style="color:var(--muted);">'+o.time+'</td><td>'+o.title+'</td><td>$'+o.price+'</td></tr>'; }).join('');
+  }
+  window.changePass = function(){
+    var np = document.getElementById('newPass').value;
+    if(np.length < 4){ document.getElementById('setMsg').style.color='#f87171'; document.getElementById('setMsg').textContent='Password must be at least 4 characters.'; return; }
+    DB.password = np; save();
+    document.getElementById('setMsg').style.color='var(--accent2)';
+    document.getElementById('setMsg').textContent='Password updated. Use it next time you log in.';
+    document.getElementById('newPass').value='';
+  };
+  window.resetAll = function(){
+    if(!confirm('This will erase ALL your listings, games, orders and password changes and restore the sample data. Continue?')) return;
+    localStorage.removeItem('gamevault_data');
+    location.reload();
+  };
+
+  renderGames(); renderChips(); renderGrid();
+})();
+</script>
+</body>
+</html>
